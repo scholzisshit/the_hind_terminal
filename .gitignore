@@ -1,4 +1,14 @@
 node_modules/
+
+# Python virtual environments
+venv/
+.venv/
+env/
+.env/
+__pycache__/
+*.py[cod]
+*.pyo
+
 .idea/
 dist/
 .DS_Store
