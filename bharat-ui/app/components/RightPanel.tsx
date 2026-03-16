@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Bell, AlertTriangle, Info, AlertCircle } from "lucide-react";
 
 type Alert = {
@@ -32,6 +32,11 @@ function timeAgo(ts: string): string {
 export default function RightPanel({ alerts }: Props) {
   const listRef = useRef<HTMLDivElement>(null);
   const prevLength = useRef(0);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     if (alerts.length > prevLength.current && listRef.current) {
@@ -40,18 +45,26 @@ export default function RightPanel({ alerts }: Props) {
     prevLength.current = alerts.length;
   }, [alerts.length]);
 
+  if (!hasMounted) {
+    return (
+      <div className="flex flex-col gap-2 w-80 h-full overflow-hidden">
+        <div className="flex items-center gap-2 px-1">
+          <div className="w-1.5 h-5 rounded-full" style={{ background: "#F25C75" }} />
+          <span className="text-[10px] font-mono font-bold tracking-widest text-white/60">LIVE INTEL FEED</span>
+        </div>
+        <div className="flex-1 glass-panel rounded-xl flex items-center justify-center">
+          <span className="text-[10px] font-mono text-white/20">INITIALIZING FEED...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-2 w-64 h-full">
+    <div className="flex flex-col gap-2 w-80 h-full overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-2 px-1">
-        <div className="w-1.5 h-5 rounded-full" style={{ background: "#F2A65A", boxShadow: "0 0 8px rgba(242,166,90,0.5)" }} />
+        <div className="w-1.5 h-5 rounded-full" style={{ background: "#F25C75" }} />
         <span className="text-[10px] font-mono font-bold tracking-widest text-white/60">LIVE INTEL FEED</span>
-        <div className="ml-auto flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#F25C75" }} />
-          <span className="text-[9px] font-mono" style={{ color: "#F25C75", fontWeight: 700 }}>
-            {alerts.filter(a => a.severity === "CRITICAL").length} CRIT
-          </span>
-        </div>
       </div>
 
       {/* Stats bar */}

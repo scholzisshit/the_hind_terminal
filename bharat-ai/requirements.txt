@@ -8,3 +8,4 @@ python-multipart==0.0.9
 pydantic>=2.9.0
 asyncio-mqtt==0.16.2
 faker==23.2.1
+python-dotenv
