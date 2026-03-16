@@ -1,0 +1,1 @@
+cargo:rustc-env=MIME_TYPES_GENERATED_PATH=/Users/nitish/Desktop/worldmonitor/bharat-core/target/release/build/mime_guess-321d0005a33ac19e/out/mime_types_generated.rs

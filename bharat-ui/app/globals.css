@@ -1,0 +1,162 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --abyss: #0A0A0A;
+  --panel: #0D0F14;
+  --border: #1A1D26;
+  --cyan: #4DD2D2;
+  --saffron: #F2A65A;
+  --emerald: #4DE6A1;
+  --crimson: #F25C75;
+  --gold: #F2D14D;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--abyss);
+  color: #E2E8F0;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #0A0A0A; }
+::-webkit-scrollbar-thumb { background: #1A1D26; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #00FFFF33; }
+
+/* Leaflet overrides */
+.leaflet-container {
+  background: #0A0A0A !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.leaflet-control-zoom {
+  background: rgba(13,15,20,0.9) !important;
+  border: 1px solid #1A1D26 !important;
+  border-radius: 8px !important;
+}
+
+.leaflet-control-zoom a {
+  background: transparent !important;
+  color: #00FFFF !important;
+  border: none !important;
+  font-size: 16px !important;
+  line-height: 28px !important;
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: rgba(0,255,255,0.1) !important;
+  border-radius: 6px !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(10,10,10,0.7) !important;
+  color: #444 !important;
+  font-size: 9px !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: rgba(13,15,20,0.97) !important;
+  border: 1px solid #1A1D26 !important;
+  border-radius: 12px !important;
+  color: #E2E8F0 !important;
+  box-shadow: 0 0 30px rgba(0,255,255,0.15) !important;
+  backdrop-filter: blur(12px);
+}
+
+.leaflet-popup-tip {
+  background: rgba(13,15,20,0.97) !important;
+}
+
+/* Glass panel */
+.glass-panel {
+  background: rgba(13, 15, 20, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+}
+
+/* Soft breathing markers */
+@keyframes pulse-marker {
+  0%   { opacity: 0.9; }
+  50%  { opacity: 0.3; }
+  100% { opacity: 0.9; }
+}
+
+.pulse-ring {
+  animation: pulse-marker 4s ease-in-out infinite;
+}
+
+/* Scanline effect on map */
+@keyframes scanline {
+  0%   { top: -2px; }
+  100% { top: 100%; }
+}
+
+.scanline::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,255,0.3), transparent);
+  animation: scanline 4s linear infinite;
+  pointer-events: none;
+  z-index: 10000;
+}
+
+/* Glow effects */
+.glow-cyan { box-shadow: 0 0 15px rgba(77,210,210,0.4); }
+.glow-saffron { box-shadow: 0 0 15px rgba(242,166,90,0.4); }
+.glow-crimson { box-shadow: 0 0 15px rgba(242,92,117,0.4); }
+.glow-emerald { box-shadow: 0 0 15px rgba(77,230,161,0.4); }
+
+/* Text glow */
+.text-glow-cyan { text-shadow: 0 0 10px rgba(77,210,210,0.6); }
+.text-glow-saffron { text-shadow: 0 0 10px rgba(242,166,90,0.6); }
+.text-glow-crimson { text-shadow: 0 0 10px rgba(242,92,117,0.6); }
+
+/* Ticker tape */
+.ticker-wrap {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ticker-content {
+  display: inline-flex;
+  animation: ticker 40s linear infinite;
+}
+
+/* Severity badges */
+.badge-critical { background: rgba(242,92,117,0.15); color: #F25C75; border: 1px solid rgba(242,92,117,0.3); }
+.badge-warning  { background: rgba(242,166,90,0.15); color: #F2A65A; border: 1px solid rgba(242,166,90,0.3); }
+.badge-info     { background: rgba(77,210,210,0.1); color: #4DD2D2; border: 1px solid rgba(77,210,210,0.2); }
+.badge-alert    { background: rgba(242,209,77,0.1); color: #F2D14D; border: 1px solid rgba(242,209,77,0.2); }
+.badge-safe     { background: rgba(77,230,161,0.1); color: #4DE6A1; border: 1px solid rgba(77,230,161,0.2); }
+
+/* Layer toggle button */
+.layer-btn {
+  @apply flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono transition-all duration-200 border cursor-pointer select-none;
+}
+
+.layer-btn.active {
+  @apply border-opacity-60 bg-opacity-20;
+}
+
+.layer-btn.inactive {
+  @apply border-white/5 text-white/40 bg-transparent;
+}
