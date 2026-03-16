@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Wifi, WifiOff, Clock, BookOpen } from "lucide-react";
 import Link from "next/link";
 import type { TelemetryFrame } from "../hooks/useTelemetry";
@@ -10,9 +11,14 @@ interface Props {
 function fmt(v: number) { return v.toLocaleString("en-IN", { maximumFractionDigits: 2 }); }
 
 export default function TopBar({ frame, connected }: Props) {
+  const [mounted, setMounted] = useState(false);
   const now = new Date();
   const istTime = now.toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", second: "2-digit" });
   const istDate = now.toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata", weekday: "short", day: "2-digit", month: "short", year: "numeric" });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const tickers = [
     { label: "SENSEX", v: frame.sensex.value, ch: frame.sensex.change, color: "#4DD2D2" },
@@ -38,7 +44,7 @@ export default function TopBar({ frame, connected }: Props) {
           ))}
         </div>
         <div>
-          <div className="text-xs font-mono font-bold text-white leading-none tracking-wider">BHARAT<span style={{ color: "#4DD2D2" }}>MONITOR</span></div>
+          <div className="text-xs font-mono font-bold text-white leading-none tracking-wider">THE <span style={{ color: "#4DD2D2" }}>HIND</span></div>
           <div className="text-[8px] font-mono text-white/30 tracking-widest leading-none mt-0.5">GEOSPATIAL INTEL PLATFORM</div>
         </div>
       </div>
@@ -79,16 +85,22 @@ export default function TopBar({ frame, connected }: Props) {
         </div>
 
         {/* Clock */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 min-w-[100px] justify-end">
           <Clock size={10} className="text-white/30" />
           <div className="text-right">
-            <div className="text-[10px] font-mono text-white/70 leading-none">{istTime}</div>
-            <div className="text-[8px] font-mono text-white/30 leading-none mt-0.5">IST · {istDate}</div>
+            {mounted ? (
+              <>
+                <div className="text-[10px] font-mono text-white/70 leading-none">{istTime}</div>
+                <div className="text-[8px] font-mono text-white/30 leading-none mt-0.5">IST · {istDate}</div>
+              </>
+            ) : (
+              <div className="text-[10px] font-mono text-white/10 leading-none animate-pulse">SYNCING...</div>
+            )}
           </div>
         </div>
 
         {/* WS Status */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 w-12 justify-end">
           {connected ? (
             <><Wifi size={11} style={{ color: "#4DE6A1" }} /><span className="text-[9px] font-mono" style={{ color: "#4DE6A1" }}>LIVE</span></>
           ) : (

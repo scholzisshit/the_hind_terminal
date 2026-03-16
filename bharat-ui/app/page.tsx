@@ -7,6 +7,8 @@ import LeftPanel from "./components/LeftPanel";
 import RightPanel from "./components/RightPanel";
 import CountryIntelPanel from "./components/CountryIntelPanel";
 import LayerControl from "./components/LayerControl";
+import AIChatPanel from "./components/AIChatPanel";
+import AIFloatingButton from "./components/AIFloatingButton";
 import { useTelemetry } from "./hooks/useTelemetry";
 import type { LayerConfig } from "./components/BharatMapInner";
 
@@ -66,13 +68,14 @@ export default function Home() {
   const { frame, history, alerts, connected } = useTelemetry();
   const [layers, setLayers] = useState<LayerConfig>(DEFAULT_LAYERS);
   const [activeCountry, setActiveCountry] = useState<string | null>("India");
-  
+  const [aiPanelOpen, setAiPanelOpen] = useState<boolean>(false);
+
   // VS Code style panel state
   const [leftTab, setLeftTab] = useState<string>("telemetry");
   const [leftPanelOpen, setLeftPanelOpen] = useState<boolean>(false);
   const [leftPanelWidth, setLeftPanelWidth] = useState<number>(296);
   const [isResizingLeft, setIsResizingLeft] = useState(false);
-  
+
   const [rightTab, setRightTab] = useState<string>("feed");
   const [rightPanelOpen, setRightPanelOpen] = useState<boolean>(false);
   const [rightPanelWidth, setRightPanelWidth] = useState<number>(272);
@@ -100,7 +103,7 @@ export default function Home() {
         const newWidth = window.innerWidth - e.clientX - 48; // offset by 48px right activity bar
         setRightPanelWidth(Math.min(Math.max(newWidth, 200), 800));
         if (rightTab === "terminal" && newWidth < 400) {
-           return; // terminal prefers wide format
+          return; // terminal prefers wide format
         }
       }
     };
@@ -204,7 +207,7 @@ export default function Home() {
             }}
           >
             {/* Drag Handle */}
-            <div 
+            <div
               className="absolute top-0 right-0 bottom-0 w-2 cursor-col-resize z-50 hover:bg-white/10"
               onMouseDown={() => setIsResizingLeft(true)}
             />
@@ -304,7 +307,7 @@ export default function Home() {
 
           {/* Corner branding */}
           <div className="absolute top-3 right-3 z-[999] flex flex-col items-end gap-1 pointer-events-none">
-            <div className="text-[8px] font-mono tracking-widest text-white/20">BHARAT MONITOR v1.0</div>
+            <div className="text-[8px] font-mono tracking-widest text-white/20">THE HIND v1.0</div>
             <div className="text-[8px] font-mono text-white/15">GEOSPATIAL INTELLIGENCE · INDIA</div>
           </div>
 
@@ -312,16 +315,18 @@ export default function Home() {
           <div className="absolute top-16 right-3 z-[999]">
             <button
               onClick={() => handleCountryClick("India")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${
-                activeCountry === "India" 
-                  ? 'bg-white/10 border-white/20 text-[#4DD2D2]' 
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${activeCountry === "India"
+                  ? 'bg-white/10 border-white/20 text-[#4DD2D2]'
                   : 'bg-black/40 border-white/5 text-white/40 hover:bg-white/5 hover:text-white'
-              } backdrop-blur-md`}
+                } backdrop-blur-md`}
             >
               <Target size={14} />
               <span className="text-[10px] font-mono font-bold tracking-widest">INDIA INTEL</span>
             </button>
           </div>
+
+          {/* AI Floating Button */}
+          <AIFloatingButton isOpen={aiPanelOpen} onClick={() => setAiPanelOpen(prev => !prev)} />
         </div>
 
         {/* Right Panel */}
@@ -344,7 +349,7 @@ export default function Home() {
             }}
           >
             {/* Drag Handle */}
-            <div 
+            <div
               className="absolute top-0 left-0 bottom-0 w-2 cursor-col-resize z-50 hover:bg-white/10"
               onMouseDown={() => setIsResizingRight(true)}
             />
@@ -366,8 +371,8 @@ export default function Home() {
                 {/* Embedded curl equivalent */}
                 <div className="flex-1 w-full bg-[#1c1c1c] p-2 relative">
                   <div className="absolute inset-0 bg-transparent pointer-events-none z-10 shadow-[inset_0_4px_12px_rgba(0,0,0,0.5)]"></div>
-                  <iframe 
-                    src="https://rate.sx" 
+                  <iframe
+                    src="https://rate.sx"
                     className="w-full h-[200%] transform origin-top-left"
                     style={{ border: "none", filter: "contrast(1.1) brightness(0.9)" }}
                     title="Terminal: rate.sx"
@@ -402,7 +407,7 @@ export default function Home() {
         {activeCountry && (
           <div
             className="absolute top-0 bottom-0 z-[2000] flex items-stretch transition-all duration-300"
-            style={{ 
+            style={{
               right: rightPanelOpen ? rightPanelWidth + 48 : 48, // offset by right panel + right activity bar
               pointerEvents: "none" // map interactions pass through container
             }}
@@ -413,6 +418,9 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* AI Chat Panel — slides in from right, fixed overlay */}
+      <AIChatPanel isOpen={aiPanelOpen} onClose={() => setAiPanelOpen(false)} />
     </div>
   );
 }

@@ -1,14 +1,14 @@
 import Link from "next/link";
-import { ArrowLeft, Map, Activity, Shield, TerminalSquare, AlertTriangle, Cpu } from "lucide-react";
+import { ArrowLeft, Map, Activity, Shield, TerminalSquare, Cpu } from "lucide-react";
 
 export default function GuidePage() {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white selection:bg-[#4DD2D2] selection:text-black font-sans overflow-x-hidden">
-      
+
       {/* Navigation Bar */}
       <nav className="sticky top-0 z-50 flex items-center px-6 py-4 bg-[#0A0A0A]/80 backdrop-blur-xl border-b border-white/5">
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="flex items-center gap-2 text-white/50 hover:text-white transition-colors"
         >
           <ArrowLeft size={16} />
@@ -22,13 +22,13 @@ export default function GuidePage() {
             ))}
           </div>
           <div>
-            <div className="text-xs font-mono font-bold text-white leading-none tracking-wider">BHARAT<span style={{ color: "#4DD2D2" }}>MONITOR</span></div>
+            <div className="text-xs font-mono font-bold text-white leading-none tracking-wider">THE <span style={{ color: "#4DD2D2" }}>HIND</span></div>
           </div>
         </div>
       </nav>
 
       <main className="max-w-4xl mx-auto px-6 py-20 pb-40 space-y-32">
-        
+
         {/* Header Section */}
         <section className="space-y-6 animate-fade-in-up">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#4DD2D2]/10 border border-[#4DD2D2]/20 text-[#4DD2D2]">
@@ -40,13 +40,13 @@ export default function GuidePage() {
             <span className="font-semibold text-white text-shadow-glow">Intelligence.</span>
           </h1>
           <p className="text-xl text-white/40 max-w-2xl leading-relaxed">
-            Bharat Monitor is a real-time, high-performance geospatial intelligence dashboard engineered for absolute situational awareness across India and South Asia.
+            The Hind is a real-time, high-performance geospatial intelligence dashboard engineered for absolute situational awareness across India and South Asia.
           </p>
         </section>
 
         {/* Feature Grid */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
+
           {/* Card 1 */}
           <div className="p-8 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors space-y-4 group">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#4DD2D2]/20 to-transparent flex items-center justify-center border border-[#4DD2D2]/20 group-hover:scale-110 transition-transform">
@@ -101,7 +101,7 @@ export default function GuidePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            
+
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded shrink-0 bg-white/5 border border-white/10 flex items-center justify-center text-xs font-mono">01</div>
@@ -141,7 +141,7 @@ export default function GuidePage() {
             <Cpu size={24} className="text-white/40" />
             <h2 className="text-xl font-light tracking-tight">System Architecture</h2>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl bg-black/40 border border-white/5">
               <div className="text-[10px] font-mono font-bold text-[#F2A65A] mb-2 tracking-widest">LAYER ONE</div>

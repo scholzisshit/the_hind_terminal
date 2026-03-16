@@ -18,6 +18,19 @@ const WS_URL = "ws://localhost:8080/ws/live";
 const RECONNECT_DELAY = 2000;
 const HISTORY_MAX = 120;
 
+// Stable static frame for SSR
+const INITIAL_FRAME: TelemetryFrame = {
+  type: "telemetry", sequence: 0,
+  sensex: { symbol: "SENSEX", value: 72000, change: 0, change_pct: 0, timestamp: new Date().toISOString() },
+  nifty: { symbol: "NIFTY50", value: 21800, change: 0, change_pct: 0, timestamp: new Date().toISOString() },
+  bank_nifty: { symbol: "BANKNIFTY", value: 46500, change: 0, change_pct: 0, timestamp: new Date().toISOString() },
+  highways: [],
+  grids: [],
+  alerts: [],
+  connected_clients: 0,
+  timestamp: new Date().toISOString(),
+};
+
 function generateFallback(seq: number): TelemetryFrame {
   const t = Date.now();
   const sin = Math.sin(seq * 0.05);
@@ -43,7 +56,7 @@ function generateFallback(seq: number): TelemetryFrame {
 }
 
 export function useTelemetry() {
-  const [frame, setFrame] = useState<TelemetryFrame>(() => generateFallback(0));
+  const [frame, setFrame] = useState<TelemetryFrame>(INITIAL_FRAME);
   const [history, setHistory] = useState<{ t: number; sensex: number; nifty: number; bankNifty: number }[]>([]);
   const [alerts, setAlerts] = useState<TelemetryFrame["alerts"]>([]);
   const [connected, setConnected] = useState(false);
@@ -53,6 +66,7 @@ export function useTelemetry() {
 
   const connect = useCallback(() => {
     try {
+      if (typeof window === "undefined") return;
       const ws = new WebSocket(WS_URL);
       wsRef.current = ws;
 
@@ -83,6 +97,11 @@ export function useTelemetry() {
 
   // Fallback simulation when WS unavailable
   useEffect(() => {
+    // Start with a fallback frame on the client to avoid sudden jumps
+    if (frame.sequence === 0 && frame.connected_clients === 0) {
+      setFrame(generateFallback(0));
+    }
+
     connect();
     const sim = setInterval(() => {
       if (!connected && (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN)) {

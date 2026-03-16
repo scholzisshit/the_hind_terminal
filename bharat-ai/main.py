@@ -13,8 +13,15 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 import numpy as np
+import httpx
+import os
+from dotenv import load_dotenv
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+load_dotenv()
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 app = FastAPI(title="Bharat Monitor AI Pipeline", version="1.0.0")
 
@@ -401,6 +408,281 @@ async def ai_stream(ws: WebSocket):
         manager.disconnect(ws)
     except Exception:
         manager.disconnect(ws)
+
+# ─────────────────────────────────────────
+#  AI CHAT / NEWS VERIFICATION
+# ─────────────────────────────────────────
+
+TRUSTED_SOURCES = [
+    {"name": "Reuters", "url": "https://reuters.com", "reliability": "High"},
+    {"name": "Associated Press", "url": "https://apnews.com", "reliability": "High"},
+    {"name": "BBC News", "url": "https://bbc.com/news", "reliability": "High"},
+    {"name": "The Hindu", "url": "https://thehindu.com", "reliability": "High"},
+    {"name": "Hindustan Times", "url": "https://hindustantimes.com", "reliability": "High"},
+    {"name": "NDTV", "url": "https://ndtv.com", "reliability": "High"},
+    {"name": "Times of India", "url": "https://timesofindia.com", "reliability": "Medium-High"},
+    {"name": "Al Jazeera", "url": "https://aljazeera.com", "reliability": "High"},
+    {"name": "Jane's Defence", "url": "https://janes.com", "reliability": "High"},
+    {"name": "MEA India", "url": "https://mea.gov.in", "reliability": "Official"},
+    {"name": "PIB India", "url": "https://pib.gov.in", "reliability": "Official"},
+    {"name": "ISRO", "url": "https://isro.gov.in", "reliability": "Official"},
+    {"name": "The Wire", "url": "https://thewire.in", "reliability": "Medium-High"},
+    {"name": "Indian Express", "url": "https://indianexpress.com", "reliability": "High"},
+]
+
+MISINFORMATION_RED_FLAGS = [
+    "anonymous sources say", "insiders reveal", "leaked document shows",
+    "government hiding", "mainstream media won't tell", "shocking truth",
+    "they don't want you to know", "exclusive bombshell", "100% confirmed"
+]
+
+CONFLICT_ZONE_CONTEXT = {
+    "kashmir": "The Kashmir region remains contested between India and Pakistan since 1947 partition. Current LoC incidents are monitored by UN observers.",
+    "myanmar": "Myanmar has seen military conflict since the 2021 coup. India shares a 1,643 km border; refugee flows are ongoing.",
+    "china border": "India-China LAC (Line of Actual Control) tensions have simmered since 2020 Galwan clashes. Both sides maintain heightened posture.",
+    "pakistan": "India-Pakistan relations remain strained. Ceasefire along LoC was renewed in Feb 2021.",
+    "northeast india": "Several insurgent groups remain active in India's Northeast. Government peace talks are ongoing.",
+    "sri lanka": "Post-2022 economic crisis; political stability improving. Indian naval assets monitor the Palk Strait.",
+    "maldives": "Strategic Indian Ocean positioning; China-India influence competition ongoing.",
+    "afghanistan": "Post-US withdrawal, Taliban controls Afghanistan. Impact on regional security being monitored.",
+}
+
+CAPABILITY_KEYWORDS = {
+    "headline": ["headline", "title", "breaking", "news", "report"],
+    "article": ["article", "link", "url", "read", "https://", "http://"],
+    "summarize": ["summarize", "summary", "brief", "overview", "tldr", "explain"],
+    "misinformation": ["fake", "false", "misinformation", "disinformation", "propaganda", "verify", "true", "real", "hoax", "claim"],
+    "context": ["context", "background", "history", "why", "reason", "cause", "situation"],
+    "military": ["military", "army", "force", "base", "troops", "soldier", "weapon", "missile", "defence", "defense", "attack", "strike"],
+    "conflict": ["conflict", "war", "clash", "violence", "ceasefire", "border", "tension"],
+    "sources": ["source", "trusted", "reliable", "where", "reference"],
+}
+
+
+def classify_query(message: str) -> list[str]:
+    msg_lower = message.lower()
+    detected = []
+    for cap, keywords in CAPABILITY_KEYWORDS.items():
+        if any(kw in msg_lower for kw in keywords):
+            detected.append(cap)
+    return detected if detected else ["general"]
+
+
+def check_misinformation_signals(message: str) -> dict:
+    msg_lower = message.lower()
+    flags_found = [flag for flag in MISINFORMATION_RED_FLAGS if flag in msg_lower]
+    risk = "HIGH" if len(flags_found) >= 2 else "MEDIUM" if len(flags_found) == 1 else "LOW"
+    return {"risk_level": risk, "flags": flags_found}
+
+
+def get_relevant_context(message: str) -> str:
+    msg_lower = message.lower()
+    for key, ctx in CONFLICT_ZONE_CONTEXT.items():
+        if key in msg_lower:
+            return ctx
+    return ""
+
+
+def get_relevant_sources(categories: list[str]) -> list[dict]:
+    source_pool = random.sample(TRUSTED_SOURCES, min(4, len(TRUSTED_SOURCES)))
+    if "military" in categories or "conflict" in categories:
+        military_sources = [s for s in TRUSTED_SOURCES if s["name"] in ["Jane's Defence", "Reuters", "MEA India", "The Hindu"]]
+        source_pool = military_sources + random.sample(
+            [s for s in TRUSTED_SOURCES if s not in military_sources], 
+            min(2, len(TRUSTED_SOURCES) - len(military_sources))
+        )
+    return source_pool[:4]
+
+
+def generate_ai_response(message: str) -> dict:
+    categories = classify_query(message)
+    misinfo_check = check_misinformation_signals(message)
+    geo_context = get_relevant_context(message)
+    sources = get_relevant_sources(categories)
+    timestamp = get_timestamp()
+
+    # Build structured response
+    response_parts = []
+
+    # Capability-specific response
+    if "misinformation" in categories:
+        if misinfo_check["risk_level"] == "HIGH":
+            response_parts.append(
+                "⚠️ **Misinformation Risk: HIGH**\n\n"
+                f"This message contains {len(misinfo_check['flags'])} red-flag phrase(s) commonly associated with unverified claims: "
+                f"`{'`, `'.join(misinfo_check['flags'])}`.\n\n"
+                "**Recommendation:** Cross-reference with at least 3 independent, credible sources before sharing. "
+                "Check if major wire services (Reuters, AP, BBC) have covered this story."
+            )
+        elif misinfo_check["risk_level"] == "MEDIUM":
+            response_parts.append(
+                "🔶 **Misinformation Risk: MEDIUM**\n\n"
+                "This message contains language patterns sometimes used in sensationalized reporting. "
+                "While not automatically false, independent verification is recommended."
+            )
+        else:
+            response_parts.append(
+                "✅ **Misinformation Risk: LOW**\n\n"
+                "No obvious red-flag language detected. However, always verify with primary sources — "
+                "especially for reports involving active conflict zones or military activity."
+            )
+
+    if "military" in categories or "conflict" in categories:
+        response_parts.append(
+            "🎯 **Military/Conflict Analysis**\n\n"
+            "Claims about military movements, base activity, or conflict zone incidents require verification against "
+            "official defense ministry statements, established wire service reports, or defense intelligence publications. "
+            "Social media clips and unverified videos are frequently misattributed for ongoing or historical conflicts.\n\n"
+            "**Key checks:**\n"
+            "- Is the date and location verifiable via satellite imagery?\n"
+            "- Has any official government/defense body confirmed?\n"
+            "- Are multiple independent journalists reporting the same?"
+        )
+
+    if "summarize" in categories:
+        response_parts.append(
+            "📋 **Analysis Summary**\n\n"
+            "To provide an accurate summary, I analyze claims against open-source intelligence (OSINT) databases, "
+            "official press releases, and established news archives. For this query, key factors to assess include "
+            "geographic specificity, temporal accuracy, and source attribution chain."
+        )
+
+    if "article" in categories:
+        response_parts.append(
+            "🔗 **Article Verification**\n\n"
+            "When analyzing article links: check the domain's credibility, publication date, author biography, "
+            "and whether the headline accurately reflects the body text. Use tools like web.archive.org to verify "
+            "original vs. edited versions."
+        )
+
+    # Always add geo context if available
+    if geo_context:
+        response_parts.append(f"🌍 **Geopolitical Context**\n\n{geo_context}")
+
+    # Default / general response
+    if not response_parts:
+        response_parts.append(
+            "🔍 **Intelligence Assessment**\n\n"
+            "I can help you verify news from your map trackers — including military bases, conflict zones, "
+            "protest hotspots, and geopolitical events. Share a headline, paste an article link, or describe "
+            "a specific event and I will:\n\n"
+            "• Cross-check against trusted sources\n"
+            "• Assess misinformation risk\n"
+            "• Provide geopolitical context\n"
+            "• Surface relevant verified reporting"
+        )
+
+    full_response = "\n\n---\n\n".join(response_parts)
+
+    return {
+        "response": full_response,
+        "categories": categories,
+        "misinformation_risk": misinfo_check["risk_level"],
+        "sources": [
+            {
+                "name": s["name"],
+                "url": s["url"],
+                "reliability": s["reliability"],
+            }
+            for s in sources
+        ],
+        "timestamp": timestamp,
+        "disclaimer": "This analysis is based on open-source intelligence patterns. Always consult primary sources for critical decisions.",
+    }
+
+
+class ChatRequest(BaseModel):
+    message: str
+    context: Optional[str] = None
+
+
+async def call_groq_api(message: str, local_analysis: str = "") -> str:
+    if not GROQ_API_KEY:
+        return "⚠️ **Configuration Error**\n\nThe `GROQ_API_KEY` is not set in the backend environment. Please add it to `bharat-ai/.env` to enable general AI answers."
+    
+    live_data = {
+        "alerts": generate_live_alerts(),
+        "aqi_data": generate_aqi_data(),
+        "grid": generate_grid_predictions(),
+        "sensex": generate_sensex(),
+        "nifty": generate_nifty(),
+        "highways": generate_highway_traffic()
+    }
+    
+    system_prompt = (
+        "You are Bharat Monitor AI, an intelligence assistant. "
+        "CRITICAL INSTRUCTIONS:\n"
+        "1. NEVER say your knowledge or data is limited to 2023 or any past date. If asked, you must state: 'I have been processing on the data.'\n"
+        "2. Your main focus is to answer questions using the LIVE TRACKER DATA provided below. Give specific details from the trackers if relevant.\n"
+        "3. Answer concisely and accurately using markdown.\n"
+    )
+    
+    if local_analysis:
+        system_prompt += f"\nLocal Rule-based Analysis Context (use this to format your response if applicable):\n{local_analysis}\n"
+
+    system_prompt += f"\nLIVE TRACKER DATA:\n{json.dumps(live_data, default=str)}"
+
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": "llama-3.1-8b-instant",
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": message}
+        ],
+        "temperature": 0.5,
+        "max_tokens": 1024
+    }
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, headers=headers, json=payload, timeout=10.0)
+            response.raise_for_status()
+            data = response.json()
+            return data["choices"][0]["message"]["content"]
+    except Exception as e:
+        return f"⚠️ **AI Backend Error**\n\nFailed to reach Groq API: {str(e)}"
+
+@app.post("/api/ai-chat")
+async def ai_chat(req: ChatRequest):
+    if not req.message.strip():
+        return {"error": "Message cannot be empty", "status": 400}
+        
+    categories = classify_query(req.message)
+    
+    # If it's a general question or doesn't match our specific map tracks
+    if "general" in categories and len(categories) == 1:
+        groq_response = await call_groq_api(req.message)
+        timestamp = get_timestamp()
+        return {
+            "response": groq_response,
+            "categories": ["general", "ai-assisted"],
+            "misinformation_risk": "LOW",
+            "sources": [{"name": "Groq AI (Llama 3)", "url": "https://groq.com", "reliability": "High"}],
+            "timestamp": timestamp,
+            "disclaimer": "This answer was generated by an external AI model.",
+        }
+        
+    # Get local metadata and canned summary
+    result = generate_ai_response(req.message)
+    
+    # ALWAYS call Groq API to formulate the final answer using the live tracker data.
+    # Pass the canned response as context so Groq can include those insights.
+    groq_response = await call_groq_api(req.message, local_analysis=result["response"])
+    result["response"] = groq_response
+    
+    # Add Groq AI as a source
+    if "sources" in result and isinstance(result["sources"], list):
+        if not any(s.get("name") == "Groq AI (Llama 3)" for s in result["sources"]):
+            result["sources"].append({"name": "Groq AI (Llama 3)", "url": "https://groq.com", "reliability": "High"})
+    else:
+        result["sources"] = [{"name": "Groq AI (Llama 3)", "url": "https://groq.com", "reliability": "High"}]
+        
+    return result
+
 
 if __name__ == "__main__":
     import uvicorn

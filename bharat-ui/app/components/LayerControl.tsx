@@ -106,7 +106,7 @@ interface Props {
 }
 
 export default function LayerControl({ layers, onToggle, onToggleAll }: Props) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<string[]>(["GEOPOLITICAL", "CITIES & TECH"]);
 
   const toggleGroup = (label: string) => {
