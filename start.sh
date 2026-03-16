@@ -1,11 +1,11 @@
 #!/bin/bash
-# ─────────────────────────────────────────────────────────
-#  BHARAT MONITOR — START SCRIPT
-#  Launches all three services in parallel:
-#    - bharat-ai  (Python FastAPI, port 8000)
-#    - bharat-core (Rust Axum, port 8080)
-#    - bharat-ui  (Next.js, port 3000)
-# ─────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
+#  BHARAT MONITOR — START SCRIPT (this script is about to be iconic fr 🚀)
+#  Launches all three services in parallel (we're serving a whole tech stack meal):
+#    - bharat-ai  (Python FastAPI, port 8000) - the brain cell of the operation 🧠
+#    - bharat-core (Rust Axum, port 8080) - blazingly fast bestie ⚡
+#    - bharat-ui  (Next.js, port 3000) - pretty face of the group 💅
+# ─────────────────────────────────────────────────────────────
 
 set -e
 ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -20,19 +20,19 @@ echo -e "${CYAN}  BHARAT MONITOR — OMNI-STACK LAUNCH${NC}"
 echo -e "${CYAN}  AI · Rust WebSocket Broker · Next.js Frontend${NC}"
 banner
 
-# Kill existing processes on our ports
+# Kill existing processes on our ports (sorry not sorry to whoever was squatting 😤)
 for PORT in 8000 8080 3000; do
   PID=$(lsof -ti:$PORT 2>/dev/null || true)
   if [ -n "$PID" ]; then
-    warn "Killing existing process on port $PORT (PID: $PID)"
+    warn "Killing existing process on port $PORT (PID: $PID) - you've been evicted bestie 💪"
     kill -9 $PID 2>/dev/null || true
   fi
 done
 
 mkdir -p "$ROOT/logs"
 
-# ── 1. Python AI Pipeline ──────────────────────────────────
-info "Starting bharat-ai (FastAPI, port 8000)..."
+# ── 1. Python AI Pipeline ──────────────────────────────
+info "Starting bharat-ai (FastAPI, port 8000) - about to serve some premium data 🍳"
 cd "$ROOT/bharat-ai"
 if [ ! -d "venv" ]; then
   info "Creating Python virtual environment..."
