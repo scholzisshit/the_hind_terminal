@@ -1,6 +1,8 @@
-# Bharat Monitor
+# Bharat Monitor 🇳🟳
 
 **Real-time continental intelligence dashboard** — Geopolitical monitoring, financial telemetry, and military tracking in a unified, modular situational awareness interface entirely hyper-focused on India & South Asia.
+
+*This project is absolutely sending us and it's giving big main character energy fr fr no cap 💯✨*
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -9,16 +11,16 @@
 
 ---
 
-## Why Bharat Monitor?
+## Why Bharat Monitor? (Bestie, let us explain) 🙏
 
-| Problem                            | Solution |
+| Problem (The Struggle) | Solution (The Glow Up) |
 | ---------------------------------- | -------- |
-| Information overload & ugly dashboards | **Clean, VS Code-style modular dashboard** where every panel can be toggled on/off. |
-| No geospatial context for events   | **Interactive high-performance Canvas map** with 34 toggleable data layers specifically tailored for the subcontinent. |
-| Clunky global trackers             | **22 custom trackers** focused on India (e.g. Student Protests, Space Ports, Naxal Insurgencies, Tech Hubs). |
-| Static news feeds                  | **Real-time updates** via Rust WebSocket layers streaming financial telemetry at 1Hz frames. |
-| Expensive OSINT tools ($$$)        | **100% free & open source** (because paying for OSINT is so 2023). |
-| You get hacked                     | We have an easter egg terminal that literally runs `curl rate.sx` inside the browser without exploding. |
+| Information overload & ugly dashboards 🤢 | **Clean, VS Code-style modular dashboard** where every panel can be toggled on/off (it's giving aesthetic vibes). |
+| No geospatial context for events 🗺️ | **Interactive high-performance Canvas map** with 34 toggleable data layers specifically tailored for the subcontinent (geography queen behavior). |
+| Clunky global trackers 🐢 | **22 custom trackers** focused on India (we said what we said - local > global). |
+| Static news feeds 😴 | **Real-time updates** via Rust WebSocket layers streaming financial telemetry at 1Hz frames (this data hits different). |
+| Expensive OSINT tools (💸💸💸) | **100% free & open source** (because paying for OSINT is giving broke energy). |
+| You get hacked 💀 | We have an easter egg terminal that literally runs `curl rate.sx` inside the browser without exploding (trust the process bestie). |
 
 ---
 
@@ -89,16 +91,18 @@ Bharat Monitor brings **34 geospatial tracker layers**, carefully categorized in
 
 ---
 
-## How to Run
+## How to Run (It's giving easy mode 🎮)
 
 ```bash
-# Full stack (Starts UI, Rust Backend & Python AI layer)
+# Full stack (Starts UI, Rust Backend & Python AI layer) - the whole squad 👨‍👩‍👧‍👦
 bash ./start.sh
 
-# Frontend only (works standalone with simulation fallback)
+# Frontend only (works standalone with simulation fallback) - just the pretty face
 cd bharat-ui
 npm install && npm run dev
 ```
+
+*Note: This setup is so smooth it's giving buttery vibes bestie 🧈✨*
 
 ---
 

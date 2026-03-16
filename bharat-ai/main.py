@@ -1,7 +1,8 @@
 """
-Bharat Monitor — AI/Data Pipeline
-FastAPI server on port 8000
+Bharat Monitor — AI/Data Pipeline 🤖
+FastAPI server on port 8000 (serving data so fresh it hasn't even been cooked yet)
 Generates and serves high-fidelity mock data for all Indian intelligence layers.
+This code is absolutely sending me - it's giving main character energy fr fr 💯
 """
 
 import asyncio
@@ -34,13 +35,14 @@ app.add_middleware(
 )
 
 # ─────────────────────────────────────────
-#  DATA GENERATORS
+#  DATA GENERATORS (these functions are absolutely GOATED 🐐)
 # ─────────────────────────────────────────
 
+# Indian cities that hit different (no cap these places are iconic) 🇳🟳
 INDIA_CITIES = [
-    {"name": "Mumbai", "lat": 19.0760, "lng": 72.8777, "state": "Maharashtra", "tier": 1},
-    {"name": "Delhi", "lat": 28.7041, "lng": 77.1025, "state": "Delhi", "tier": 1},
-    {"name": "Bengaluru", "lat": 12.9716, "lng": 77.5946, "state": "Karnataka", "tier": 1},
+    {"name": "Mumbai", "lat": 19.0760, "lng": 72.8777, "state": "Maharashtra", "tier": 1},  # The city that never sleeps (relatable)
+    {"name": "Delhi", "lat": 28.7041, "lng": 77.1025, "state": "Delhi", "tier": 1},  # Where politics goes to have beef
+    {"name": "Bengaluru", "lat": 12.9716, "lng": 77.5946, "state": "Karnataka", "tier": 1},  # Tech bro headquarters
     {"name": "Hyderabad", "lat": 17.3850, "lng": 78.4867, "state": "Telangana", "tier": 1},
     {"name": "Chennai", "lat": 13.0827, "lng": 80.2707, "state": "Tamil Nadu", "tier": 1},
     {"name": "Pune", "lat": 18.5204, "lng": 73.8567, "state": "Maharashtra", "tier": 1},
@@ -125,13 +127,14 @@ ALERT_TEMPLATES = [
 ]
 
 # ─────────────────────────────────────────
-#  REAL-TIME DATA FUNCTIONS
+#  REAL-TIME DATA FUNCTIONS (these hit harder than your morning coffee ☕️)
 # ─────────────────────────────────────────
 
 def get_timestamp() -> str:
     return datetime.utcnow().isoformat() + "Z"
 
 def noise(base: float, pct: float = 0.05) -> float:
+    """Add some chaos to our data because life isn't predictable bestie 🎲"""
     return base * (1 + random.uniform(-pct, pct))
 
 def generate_sensex() -> Dict:
